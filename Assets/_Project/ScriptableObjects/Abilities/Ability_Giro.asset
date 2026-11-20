@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1387f643096e93d4cab0159beba41cf2, type: 3}
+  m_Name: Ability_Giro
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Abilities.SpinAbilityData
+  displayName: Giro
+  description: 
+  icon: {fileID: 0}
+  cooldown: 6
+  damage: 12
+  radius: 2.5
+  knockback: 1.5
+  interrupts: 1
+  level: 1
+  duration: 1
+  tickInterval: 0.25
+  moveSpeedMultiplier: 0.4
+  visualSpinSpeed: 1080
+  explosionRadius: 3.5
+  explosionDamage: 45
+  explosionKnockback: 8
