@@ -5624,6 +5624,7 @@ GameObject:
   - component: {fileID: 901209645}
   - component: {fileID: 901209646}
   - component: {fileID: 901209647}
+  - component: {fileID: 901209648}
   m_Layer: 6
   m_Name: Knight
   m_TagString: Untagged
@@ -5794,7 +5795,7 @@ MonoBehaviour:
   health: {fileID: 0}
   slots:
   - {fileID: 901209647}
-  - {fileID: 0}
+  - {fileID: 901209648}
   targetMask:
     serializedVersion: 2
     m_Bits: 0
@@ -5812,6 +5813,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Abilities.SpinAbility
   data: {fileID: 11400000, guid: 9a58f19a41a216843a2e9444fab2c155, type: 2}
   spinVisual: {fileID: 371808228}
+--- !u!114 &901209648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 901209639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 783eb48fe8201154bb1786d98c4c3adc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Abilities.ChargeAbility
+  data: {fileID: 11400000, guid: 8bda997254749254fa48c24e02357021, type: 2}
 --- !u!1001 &923155130
 PrefabInstance:
   m_ObjectHideFlags: 0
