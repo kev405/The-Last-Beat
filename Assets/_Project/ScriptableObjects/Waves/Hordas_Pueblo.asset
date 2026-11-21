@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d448f04e4ad808848bd534c631c4fe4b, type: 3}
+  m_Name: Hordas_Pueblo
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Waves.WaveData
+  waves:
+  - name: Primera horda
+    count: 5
+    spawnInterval: 0.8
+    maxAlive: 5
+    delayBefore: 2
+  - name: Segunda horda
+    count: 8
+    spawnInterval: 0.6
+    maxAlive: 6
+    delayBefore: 3
+  - name: Tercera horda
+    count: 12
+    spawnInterval: 0.5
+    maxAlive: 8
+    delayBefore: 3
