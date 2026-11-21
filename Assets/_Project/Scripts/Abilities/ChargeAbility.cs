@@ -59,7 +59,7 @@ namespace TheLastBeat.Abilities
                 // Golpea el tramo recorrido en este frame, con un poco de margen hacia adelante.
                 float length = Vector3.Distance(before, after);
                 Vector3 center = (before + after) * 0.5f + Vector3.up + direction * 0.3f;
-                Vector3 halfExtents = new Vector3(Charge.width * 0.5f, 1f, length * 0.5f + 0.6f);
+                Vector3 halfExtents = new Vector3(Charge.width * Caster.AreaMultiplier * 0.5f, 1f, length * 0.5f + 0.6f);
                 Hits.BoxHit(center, halfExtents, Quaternion.LookRotation(direction), Caster.TargetMask,
                             MakeDamage(Charge.damage, center, direction, Charge.knockback, false));
             }

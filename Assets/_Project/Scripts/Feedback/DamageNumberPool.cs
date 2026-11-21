@@ -82,6 +82,14 @@ namespace TheLastBeat.Feedback
             n.Show(info.HitPoint + Vector3.up * heightOffset, info.Amount, c, s, Release);
         }
 
+        /// <summary>Muestra un texto flotante con el mismo estilo (lo usa la esquiva automática, tarea 19).</summary>
+        public void ShowLabel(Vector3 position, string label, Color color, float scale = 1f)
+        {
+            if (pool == null) return;
+            DamageNumber n = pool.Get();
+            n.ShowLabel(position, label, color, scale, Release);
+        }
+
         private void Release(DamageNumber n) => pool.Release(n);
     }
 }

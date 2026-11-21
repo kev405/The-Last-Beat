@@ -64,6 +64,9 @@ namespace TheLastBeat.Player
         /// <summary>Multiplicador de daño (la potenciación de la bardo lo sube en la tarea 19).</summary>
         public float DamageMultiplier { get; set; } = 1f;
 
+        /// <summary>Multiplicador del radio de los golpes (la potenciación de la bardo lo sube en la tarea 19).</summary>
+        public float AreaMultiplier { get; set; } = 1f;
+
         public bool IsAttacking => step >= 0;
         public int CurrentStep => step;
 
@@ -172,7 +175,7 @@ namespace TheLastBeat.Player
             Vector3 center = HitCenter(s);
             DamageInfo info = DamageInfo.Create(s.damage * DamageMultiplier, gameObject, MyTeam,
                                                 center, transform.forward, s.knockback, true, s.isHeavy);
-            int landed = hits.SphereHit(center, s.radius, targetMask, info);
+            int landed = hits.SphereHit(center, s.radius * AreaMultiplier, targetMask, info);
             AttackLanded?.Invoke(step, landed);
         }
 

@@ -33,6 +33,9 @@ namespace TheLastBeat.Abilities
         /// <summary>Multiplicador de daño de todas las habilidades (potenciación, mejoras).</summary>
         public float DamageMultiplier { get; set; } = 1f;
 
+        /// <summary>Multiplicador del área de las habilidades (la potenciación de la bardo lo sube, tarea 19).</summary>
+        public float AreaMultiplier { get; set; } = 1f;
+
         /// <summary>Multiplicador de recarga (0.8 = 20 % más rápida).</summary>
         public float CooldownMultiplier { get; set; } = 1f;
 

@@ -46,6 +46,13 @@ namespace TheLastBeat.Feedback
             if (Camera.main != null) cameraTransform = Camera.main.transform;
         }
 
+        /// <summary>Muestra una palabra en vez de un número (por ejemplo, "¡Esquiva!").</summary>
+        public void ShowLabel(Vector3 position, string label, Color newColor, float scale, Action<DamageNumber> finished)
+        {
+            Show(position, 0f, newColor, scale, finished);
+            text.SetText(label);
+        }
+
         private void LateUpdate()
         {
             float dt = Time.deltaTime; // se congela con la pausa de impacto, como el resto

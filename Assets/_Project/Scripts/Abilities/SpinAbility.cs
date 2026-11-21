@@ -54,7 +54,7 @@ namespace TheLastBeat.Abilities
                 nextTick += Spin.tickInterval;
                 Hits.BeginAttack(); // cada vuelta puede golpear otra vez a los mismos
                 Vector3 center = transform.position + Vector3.up;
-                Hits.SphereHit(center, Spin.radius, Caster.TargetMask,
+                Hits.SphereHit(center, Spin.radius * Caster.AreaMultiplier, Caster.TargetMask,
                                MakeDamage(Spin.damage, center, transform.forward, Spin.knockback, false));
             }
 
@@ -69,9 +69,10 @@ namespace TheLastBeat.Abilities
         {
             Hits.BeginAttack();
             Vector3 center = transform.position + Vector3.up * 0.5f;
-            Hits.SphereHit(center, Spin.explosionRadius, Caster.TargetMask,
+            float radius = Spin.explosionRadius * Caster.AreaMultiplier;
+            Hits.SphereHit(center, radius, Caster.TargetMask,
                            MakeDamage(Spin.explosionDamage, center, transform.forward, Spin.explosionKnockback, true));
-            Exploded?.Invoke(center, Spin.explosionRadius);
+            Exploded?.Invoke(center, radius);
         }
 
         protected override void OnEnd()
