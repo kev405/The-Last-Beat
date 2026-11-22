@@ -46,7 +46,7 @@ namespace TheLastBeat.EditorTools
         private static readonly Color Dust = new Color(0.62f, 0.58f, 0.52f, 0.60f);
 
         // Arco del giro: media luna plana, hija de Visual, así que gira con el caballero sin escalones.
-        private const float ArcRadius = 1.65f;        // metros desde el centro hasta el borde exterior (la punta de la espada)
+        private const float ArcRadius = 2.0f;         // metros desde el centro hasta el borde exterior (un poco más allá de la punta de la espada)
         private const float ArcHeight = 0.90f;        // altura de la espada durante el giro
         private const float ArcLengthDegrees = 260f;  // cuánto rodea al caballero antes de desvanecerse
         private const float ArcHeadDegrees = 12f;     // ángulo de la espada respecto a la derecha del caballero
