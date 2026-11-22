@@ -19,14 +19,16 @@ namespace TheLastBeat.EditorTools
 {
     /// <summary>
     /// Construye la interfaz con medidas exactas desde el menú "The Last Beat" (tareas 34 y 35):
-    ///  - Crear HUD en la escena abierta: barras de vida, canción, habilidades, hordas, mensajes
-    ///    y pantallas de victoria y derrota, ya conectados a los objetos de la escena.
+    ///  - Crear HUD en la escena abierta: barras de vida, canción, habilidades (las del caballero y, si la bardo
+    ///    ya tiene su combate montado, las suyas), hordas, mensajes y pantallas de victoria y derrota, ya
+    ///    conectados a los objetos de la escena.
     ///  - Crear escena de menú principal: MainMenu.unity con Jugar y Salir, y ambas escenas en la build.
     /// Todo se puede ajustar después a mano. Es código de editor: no va en la build del juego.
     /// </summary>
     public static class UiBuilder
     {
         private const string ScenesFolder = "Assets/_Project/Scenes/";
+        internal const string BardAbilitiesName = "BardAbilities";
 
         private static readonly Color PanelColor = new Color(0.07f, 0.06f, 0.09f, 0.72f);
         private static readonly Color BarBack = new Color(0.1f, 0.09f, 0.12f, 0.95f);
@@ -131,6 +133,10 @@ namespace TheLastBeat.EditorTools
             Slot(abilities, "Slot_Giro", new Vector2(-140, 0), "Q", 0, caster);
             Slot(abilities, "Slot_Embestida", new Vector2(0, 0), "E", 1, caster);
 
+            // --- Habilidades de la bardo (abajo a la izquierda), si ya tiene su combate montado
+            AbilityCaster bardCaster = bard != null ? bard.GetComponent<AbilityCaster>() : null;
+            if (bardCaster != null) CreateBardAbilities(canvas, bardCaster);
+
             // --- Pantallas de fin
             EndScreenUI end = canvas.gameObject.AddComponent<EndScreenUI>();
             Set(end, "flow", flow);
@@ -198,12 +204,44 @@ namespace TheLastBeat.EditorTools
 
         // ------------------------------------------------------------------ Piezas
 
-        private static void Slot(RectTransform parent, string name, Vector2 pos, string key, int index, AbilityCaster caster)
+        /// <summary>
+        /// Ranuras de las habilidades de la bardo: abajo a la izquierda, con el rótulo BARDO y la misma recarga que
+        /// las del caballero (AbilitySlotUI). No llevan tecla porque las usa la IA. Si el grupo ya existía en ese
+        /// canvas, lo rehace. Lo llama también el menú "Montar combate de la bardo" para añadirlas a un HUD ya creado.
+        /// </summary>
+        internal static RectTransform CreateBardAbilities(RectTransform canvas, AbilityCaster caster)
+        {
+            if (canvas == null) return null;
+
+            Transform old = canvas.Find(BardAbilitiesName);
+            if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
+
+            RectTransform group = Rect(BardAbilitiesName, canvas, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(32, 32), new Vector2(260, 156));
+            Undo.RegisterCreatedObjectUndo(group.gameObject, "Crear ranuras de la bardo");
+            AddText(Rect("Label", group, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(4, 0), new Vector2(252, 30)),
+                    "BARDO", 20, Lavender, TextAlignmentOptions.Left, true);
+            Slot(group, "Slot_GolpeDeBajo", new Vector2(-140, 0), "", 0, caster);
+            Slot(group, "Slot_PistaDeBaile", new Vector2(0, 0), "", 1, caster);
+
+            // Justo después de las ranuras del caballero: así las pantallas de victoria y derrota, que van al
+            // final del canvas, se siguen dibujando por encima.
+            Transform knightSlots = canvas.Find("Abilities");
+            if (knightSlots != null) group.SetSiblingIndex(knightSlots.GetSiblingIndex() + 1);
+
+            EditorSceneManager.MarkSceneDirty(canvas.gameObject.scene);
+            return group;
+        }
+
+        private static RectTransform Slot(RectTransform parent, string name, Vector2 pos, string key, int index, AbilityCaster caster)
         {
             RectTransform slot = Rect(name, parent, new Vector2(1, 0), new Vector2(1, 0), new Vector2(1, 0), pos, new Vector2(120, 120));
             AddImage(slot, PanelColor, UiSprite, Image.Type.Sliced);
             TMP_Text nameText = AddText(Rect("Name", slot, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0), new Vector2(0, 8), new Vector2(0, 28)),
                                         "HABILIDAD", 18, Color.white, TextAlignmentOptions.Center, true);
+            // Los nombres largos ("GOLPE DE BAJO") se encogen para caber en la ranura en vez de salirse.
+            nameText.enableAutoSizing = true;
+            nameText.fontSizeMin = 11f;
+            nameText.fontSizeMax = 18f;
             AddText(Rect("Key", slot, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -6), new Vector2(30, 30)),
                     key, 22, Gold, TextAlignmentOptions.Left, true);
             Image overlay = AddImage(Stretch("Cooldown", slot, 0), new Color(0f, 0f, 0f, 0.65f), UiSprite, Image.Type.Filled);
@@ -219,6 +257,7 @@ namespace TheLastBeat.EditorTools
             Set(ui, "nameText", nameText);
             Set(ui, "cooldownOverlay", overlay);
             Set(ui, "cooldownText", cdText);
+            return slot;
         }
 
         private static HealthBar Bar(RectTransform parent, string name, Vector2 pos, Vector2 size, Color fillColor)

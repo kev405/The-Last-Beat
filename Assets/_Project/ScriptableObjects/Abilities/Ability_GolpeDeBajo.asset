@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4bef9bd45580c2458563090358a3349, type: 3}
+  m_Name: Ability_GolpeDeBajo
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Abilities.BassDropAbilityData
+  displayName: Golpe de bajo
+  description: Pisa al ritmo y suelta una onda que empuja a los enemigos que tiene
+    alrededor.
+  icon: {fileID: 0}
+  cooldown: 9
+  damage: 10
+  radius: 4
+  knockback: 11
+  interrupts: 1
+  level: 1
+  stunSeconds: 0
+  staggers: 1
+  hitDelay: 0.38888887
+  castTime: 1

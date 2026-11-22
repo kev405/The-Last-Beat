@@ -15,9 +15,18 @@ namespace TheLastBeat.Combat
 
         public static void RaiseHit(IDamageable target, DamageInfo info) => Hit?.Invoke(target, info);
 
+        /// <summary>Alguien recuperó vida: a quién y cuánto (lo que devolvió Health.Heal). Lo escuchan los números verdes.</summary>
+        public static event Action<Health, float> Healed;
+
+        public static void RaiseHeal(Health target, float amount) => Healed?.Invoke(target, amount);
+
         // Si se desactiva "Domain Reload" en Play Mode, los eventos estáticos sobreviven entre
         // partidas y se acumulan suscriptores. Esto los limpia al iniciar cada Play.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => Hit = null;
+        private static void ResetStatics()
+        {
+            Hit = null;
+            Healed = null;
+        }
     }
 }

@@ -28,6 +28,8 @@ namespace TheLastBeat.Feedback
 
         private void OnHit(IDamageable target, DamageInfo info)
         {
+            if (info.Quiet) return; // golpes de compañeros a distancia: no sacuden la cámara
+
             float now = Time.unscaledTime;
             bool heavy = info.IsHeavy;
             if (!heavy && now - lastTime < minInterval) return;

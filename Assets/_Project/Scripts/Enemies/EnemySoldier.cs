@@ -91,6 +91,12 @@ namespace TheLastBeat.Enemies
         public bool IsDead => state == State.Dead;
         public Health Health => health;
 
+        /// <summary>true mientras prepara un golpe (el aviso del suelo está encendido). Lo consulta la IA de la bardo.</summary>
+        public bool IsPreparingAttack => state == State.Windup;
+
+        /// <summary>El héroe al que persigue o está por golpear. Puede ser null.</summary>
+        public HeroTarget Target => target;
+
         private void Awake()
         {
             agent = GetComponent<NavMeshAgent>();

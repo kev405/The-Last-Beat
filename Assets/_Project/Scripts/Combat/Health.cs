@@ -77,13 +77,18 @@ namespace TheLastBeat.Combat
             return true;
         }
 
-        /// <summary>Cura sin pasar del máximo. No revive a una entidad muerta.</summary>
-        public void Heal(float amount)
+        /// <summary>
+        /// Cura sin pasar del máximo. No revive a una entidad muerta. Devuelve cuánta vida recuperó de verdad
+        /// (0 si ya estaba llena), para que quien cura pueda avisar con CombatEvents.RaiseHeal.
+        /// </summary>
+        public float Heal(float amount)
         {
-            if (isDead || amount <= 0f) return;
+            if (isDead || amount <= 0f) return 0f;
             float previous = currentHealth;
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-            if (!Mathf.Approximately(previous, currentHealth)) HealthChanged?.Invoke(this);
+            float applied = currentHealth - previous;
+            if (applied > 0f && !Mathf.Approximately(previous, currentHealth)) HealthChanged?.Invoke(this);
+            return applied;
         }
 
         /// <summary>Deja la vida al máximo y revive. Usado al sacar un enemigo del pool.</summary>

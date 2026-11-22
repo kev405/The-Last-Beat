@@ -36,6 +36,13 @@ namespace TheLastBeat.Combat
         /// <summary>Golpe especial (tercer golpe del combo, explosión) para efectos más fuertes.</summary>
         public bool IsHeavy;
 
+        /// <summary>
+        /// Golpe silencioso: se aplica y muestra su número, pero sin pausa de impacto ni sacudida de cámara.
+        /// Lo usan los ataques a distancia de los compañeros (la Nota de la bardo), para que no le congelen
+        /// el juego al jugador cada vez que aciertan. Por defecto es false.
+        /// </summary>
+        public bool Quiet;
+
         public static DamageInfo Create(float amount, GameObject source, Team sourceTeam,
                                         Vector3 hitPoint, Vector3 direction,
                                         float knockback = 0f, bool interrupts = true, bool isHeavy = false)

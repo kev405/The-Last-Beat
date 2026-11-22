@@ -9,7 +9,7 @@ namespace TheLastBeat.Feedback
     /// Crea los números de daño de todos los golpes (tarea 12). Los reutiliza con un
     /// ObjectPool: nunca hace Instantiate ni Destroy durante el combate.
     /// Colores: blanco = golpe de héroe, dorado y más grande = golpe pesado,
-    /// rojo = daño que recibe un héroe.
+    /// rojo = daño que recibe un héroe, verde con "+" = curación (CombatEvents.Healed).
     /// </summary>
     public class DamageNumberPool : MonoBehaviour
     {
@@ -21,10 +21,13 @@ namespace TheLastBeat.Feedback
         [SerializeField] private Color heroHitColor = Color.white;
         [SerializeField] private Color heavyHitColor = new Color(1f, 0.82f, 0.25f);
         [SerializeField] private Color heroDamagedColor = new Color(1f, 0.32f, 0.26f);
+        [SerializeField] private Color healColor = new Color(0.35f, 0.95f, 0.45f);
         [SerializeField, Min(0.1f)] private float normalScale = 1f;
         [SerializeField, Min(0.1f)] private float heavyScale = 1.5f;
         [Tooltip("Altura extra sobre el punto de impacto.")]
         [SerializeField] private float heightOffset = 0.8f;
+        [Tooltip("Altura sobre los pies de quien se cura a la que sale el número verde.")]
+        [SerializeField] private float healHeight = 2f;
 
         private ObjectPool<DamageNumber> pool;
 
@@ -51,8 +54,17 @@ namespace TheLastBeat.Feedback
             foreach (var n in warm) pool.Release(n);
         }
 
-        private void OnEnable() => CombatEvents.Hit += OnHit;
-        private void OnDisable() => CombatEvents.Hit -= OnHit;
+        private void OnEnable()
+        {
+            CombatEvents.Hit += OnHit;
+            CombatEvents.Healed += OnHealed;
+        }
+
+        private void OnDisable()
+        {
+            CombatEvents.Hit -= OnHit;
+            CombatEvents.Healed -= OnHealed;
+        }
 
         private DamageNumber Create()
         {
@@ -80,6 +92,15 @@ namespace TheLastBeat.Feedback
 
             DamageNumber n = pool.Get();
             n.Show(info.HitPoint + Vector3.up * heightOffset, info.Amount, c, s, Release);
+        }
+
+        private void OnHealed(Health target, float amount)
+        {
+            if (pool == null || target == null) return;
+            if (Mathf.RoundToInt(amount) <= 0) return; // curaciones de menos de medio punto no muestran "+0"
+
+            DamageNumber n = pool.Get();
+            n.ShowHeal(target.transform.position + Vector3.up * healHeight, amount, healColor, normalScale, Release);
         }
 
         /// <summary>Muestra un texto flotante con el mismo estilo (lo usa la esquiva automática, tarea 19).</summary>

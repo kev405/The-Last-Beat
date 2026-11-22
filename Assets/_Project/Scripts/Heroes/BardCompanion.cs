@@ -13,6 +13,8 @@ namespace TheLastBeat.Heroes
     ///  2. Si está lejos del caballero, se acerca hasta quedar a followDistance.
     ///  3. Si no, se queda quieta.
     /// Si queda atascada a más de teleportDistance, reaparece detrás del caballero.
+    /// Solo decide por dónde moverse: cuándo atacar o usar una habilidad lo decide BardCombatAI. Para ellos expone
+    /// AddMoveLock / RemoveMoveLock (se queda clavada mientras dura una habilidad) y AimAt (gira hacia un objetivo).
     /// En la entrega final se reemplaza por la IA de compañeros (tareas 51 y 52).
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(Health))]
@@ -43,6 +45,10 @@ namespace TheLastBeat.Heroes
         [SerializeField] private LayerMask enemyMask;
         [SerializeField, Min(0.05f)] private float scanInterval = 0.2f;
 
+        [Header("Apuntar")]
+        [Tooltip("Grados por segundo a los que gira hacia su objetivo al disparar.")]
+        [SerializeField, Min(0f)] private float aimTurnSpeed = 720f;
+
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
 
         private readonly Collider[] buffer = new Collider[16];
@@ -52,8 +58,55 @@ namespace TheLastBeat.Heroes
         private float scanTimer;
         private float deathTimer;
         private Quaternion visualStart;
+        private int moveLocks;
+        private Vector3 aimPoint;
+        private float aimTimer;
+        private bool aiming;
 
         public bool IsFleeing => mode == Mode.Flee;
+        public bool IsDead => mode == Mode.Dead;
+        public bool IsMoveLocked => moveLocks > 0;
+
+        /// <summary>Radio en el que considera que un enemigo es peligro y huye. La IA de combate usa el mismo.</summary>
+        public float DangerRadius => dangerRadius;
+        public LayerMask EnemyMask => enemyMask;
+
+        /// <summary>
+        /// La deja clavada en el sitio (por ejemplo, mientras dura una habilidad): suelta la ruta y deja de pensar
+        /// a dónde ir. Cada AddMoveLock necesita su RemoveMoveLock.
+        /// </summary>
+        public void AddMoveLock()
+        {
+            moveLocks++;
+            if (moveLocks == 1 && agent.enabled && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+                agent.isStopped = true;
+                agent.velocity = Vector3.zero;
+            }
+        }
+
+        public void RemoveMoveLock()
+        {
+            if (moveLocks == 0) return;
+            moveLocks--;
+            if (moveLocks == 0 && mode != Mode.Dead && agent.enabled && agent.isOnNavMesh)
+            {
+                agent.isStopped = false;
+                mode = Mode.Idle;
+                scanTimer = 0f; // decide de inmediato qué hacer (huir, seguir o quedarse)
+            }
+        }
+
+        /// <summary>
+        /// Gira hacia ese punto durante esos segundos, aunque esté caminando hacia otro lado. Lo usa la Nota para
+        /// que el disparo salga hacia el enemigo. Al acabar, el NavMeshAgent vuelve a girarla hacia donde camina.
+        /// </summary>
+        public void AimAt(Vector3 point, float seconds)
+        {
+            aimPoint = point;
+            aimTimer = Mathf.Max(aimTimer, seconds);
+        }
 
         private void Awake()
         {
@@ -85,11 +138,17 @@ namespace TheLastBeat.Heroes
                 return;
             }
 
-            scanTimer -= dt;
-            if (scanTimer <= 0f)
+            UpdateAim(dt);
+
+            // Clavada por una habilidad: no decide a dónde ir hasta que la suelten.
+            if (moveLocks == 0)
             {
-                scanTimer = scanInterval;
-                Think();
+                scanTimer -= dt;
+                if (scanTimer <= 0f)
+                {
+                    scanTimer = scanInterval;
+                    Think();
+                }
             }
 
             if (animator != null)
@@ -150,6 +209,30 @@ namespace TheLastBeat.Heroes
             }
         }
 
+        private void UpdateAim(float dt)
+        {
+            if (aimTimer <= 0f)
+            {
+                if (aiming)
+                {
+                    aiming = false;
+                    agent.updateRotation = true;
+                }
+                return;
+            }
+
+            aimTimer -= dt;
+            if (!aiming)
+            {
+                aiming = true;
+                agent.updateRotation = false; // mientras apunta, el giro es suyo y no del NavMeshAgent
+            }
+
+            Vector3 dir = Flat(aimPoint - transform.position);
+            if (dir.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), aimTurnSpeed * dt);
+        }
+
         /// <summary>Promedio de la posición de los enemigos vivos dentro de dangerRadius.</summary>
         private bool FindThreat(Vector3 pos, out Vector3 threat)
         {
@@ -181,6 +264,8 @@ namespace TheLastBeat.Heroes
         {
             mode = Mode.Dead;
             deathTimer = 0f;
+            moveLocks = 0;
+            aimTimer = 0f;
             if (agent.enabled)
             {
                 agent.isStopped = true;

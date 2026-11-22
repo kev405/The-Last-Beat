@@ -31,6 +31,7 @@ namespace TheLastBeat.Feedback
 
         private void OnHit(IDamageable target, DamageInfo info)
         {
+            if (info.Quiet) return; // golpes de compañeros a distancia: no pausan el juego
             if (onlyHeroAttacks && info.SourceTeam != Team.Heroes) return;
             if (!active && Time.timeScale == 0f) return; // el juego está en pausa
 

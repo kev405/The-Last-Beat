@@ -46,6 +46,13 @@ namespace TheLastBeat.Feedback
             if (Camera.main != null) cameraTransform = Camera.main.transform;
         }
 
+        /// <summary>Muestra una curación: el mismo número flotante, con un "+" delante.</summary>
+        public void ShowHeal(Vector3 position, float amount, Color newColor, float scale, Action<DamageNumber> finished)
+        {
+            Show(position, amount, newColor, scale, finished);
+            text.SetText("+{0}", Mathf.RoundToInt(amount)); // sin crear strings nuevos por curación
+        }
+
         /// <summary>Muestra una palabra en vez de un número (por ejemplo, "¡Esquiva!").</summary>
         public void ShowLabel(Vector3 position, string label, Color newColor, float scale, Action<DamageNumber> finished)
         {
