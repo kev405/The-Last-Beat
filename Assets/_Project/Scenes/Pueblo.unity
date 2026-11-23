@@ -15889,7 +15889,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 1
@@ -28858,7 +28858,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 1
@@ -39366,7 +39366,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
       time: 0.05
@@ -39424,7 +39424,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
       time: 0.1
@@ -39482,7 +39482,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
       time: 0.15
@@ -39540,7 +39540,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
       time: 0.2
@@ -39598,7 +39598,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 1
@@ -56103,6 +56103,7 @@ GameObject:
   - component: {fileID: 1611419436}
   - component: {fileID: 1611419438}
   - component: {fileID: 1611419437}
+  - component: {fileID: 1611419439}
   m_Layer: 7
   m_Name: Aura
   m_TagString: Untagged
@@ -56182,6 +56183,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1611419435}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1611419439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611419435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c94d7b02c1af566468cf824895170d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Feedback.BeatPulse
+  songAudio: {fileID: 1859566905}
+  amount: 0.03
+  downbeatExtra: 0.03
+  settleTime: 0.22
+  flat: 1
 --- !u!1 &1614609005
 GameObject:
   m_ObjectHideFlags: 0
@@ -58771,6 +58789,7 @@ GameObject:
   - component: {fileID: 1859566904}
   - component: {fileID: 1859566903}
   - component: {fileID: 1859566902}
+  - component: {fileID: 1859566905}
   m_Layer: 7
   m_Name: Bard
   m_TagString: Untagged
@@ -59212,6 +59231,30 @@ MonoBehaviour:
   speed: 14
   fireForward: 1
   chargeTime: 0.2
+--- !u!114 &1859566905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859566877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 582d6b44d6e1dc542b4f859156326c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Heroes.BardSongAudio
+  song: {fileID: 1859566884}
+  level: {fileID: 0}
+  loopClip: {fileID: 8300000, guid: 30eff070bec667f42950bd7c40b48fcd, type: 3}
+  introClip: {fileID: 8300000, guid: 6811f85a7a704e940ab8993d70220fa1, type: 3}
+  bpm: 96
+  beatsPerBar: 4
+  resumeEveryBars: 4
+  volume: 0.6
+  spatialBlend: 0
+  output: {fileID: 0}
+  cutTime: 0.35
+  fadeTime: 1.2
 --- !u!1 &1888303481
 GameObject:
   m_ObjectHideFlags: 0
