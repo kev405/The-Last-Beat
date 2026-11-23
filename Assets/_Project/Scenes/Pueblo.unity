@@ -1013,6 +1013,53 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 107180802}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &175842111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 175842113}
+  - component: {fileID: 175842112}
+  m_Layer: 0
+  m_Name: SfxPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &175842112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175842111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65df71b201ec4fc46b469338deeb9a3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Audio.SfxPlayer
+  voices: 24
+  volume: 1
+  output: {fileID: -2321668721711893580, guid: 6b21c8b789819a24a8ae5944cb17d534, type: 2}
+--- !u!4 &175842113
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175842111}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &195348614
 GameObject:
   m_ObjectHideFlags: 0
@@ -1199,6 +1246,7 @@ GameObject:
   - component: {fileID: 205209629}
   - component: {fileID: 205209628}
   - component: {fileID: 205209630}
+  - component: {fileID: 205209631}
   m_Layer: 5
   m_Name: RetryButton
   m_TagString: Untagged
@@ -1308,6 +1356,30 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &205209631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205209626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d1f61e6b2433f84cb4b20719562ac53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.UI.ButtonSfx
+  hover:
+    clips:
+    - {fileID: 8300000, guid: aefe0a99b107d8b4290af1e7b36a4725, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
+  click:
+    clips:
+    - {fileID: 8300000, guid: ff812f7ef9ace1a4eb3209c1227a6fd7, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
 --- !u!1 &214779038
 GameObject:
   m_ObjectHideFlags: 0
@@ -27176,6 +27248,7 @@ GameObject:
   - component: {fileID: 776937009}
   - component: {fileID: 776937008}
   - component: {fileID: 776937010}
+  - component: {fileID: 776937011}
   m_Layer: 5
   m_Name: RetryButton
   m_TagString: Untagged
@@ -27285,6 +27358,30 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &776937011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776937006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d1f61e6b2433f84cb4b20719562ac53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.UI.ButtonSfx
+  hover:
+    clips:
+    - {fileID: 8300000, guid: aefe0a99b107d8b4290af1e7b36a4725, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
+  click:
+    clips:
+    - {fileID: 8300000, guid: ff812f7ef9ace1a4eb3209c1227a6fd7, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
 --- !u!1 &780602776
 GameObject:
   m_ObjectHideFlags: 0
@@ -43501,6 +43598,7 @@ GameObject:
   - component: {fileID: 901209658}
   - component: {fileID: 901209657}
   - component: {fileID: 901209656}
+  - component: {fileID: 901209659}
   m_Layer: 6
   m_Name: Knight
   m_TagString: Untagged
@@ -43878,6 +43976,30 @@ MonoBehaviour:
   onFinish: []
   objects:
   - {fileID: 1950481983}
+--- !u!114 &901209659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 901209639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eda53462f13f5448a5b287e2d4c6b1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Audio.Footsteps
+  steps:
+    clips:
+    - {fileID: 8300000, guid: 6d0850a365e0508428dec32b26c0a3a2, type: 3}
+    - {fileID: 8300000, guid: 5fac39833c54ed54ca5b6e2503ccc66d, type: 3}
+    - {fileID: 8300000, guid: f5f82a6d2fd21024f84eaa163c252b1b, type: 3}
+    - {fileID: 8300000, guid: 8814503231182fe42ab961a575a0c3c1, type: 3}
+    volume: 0.4
+    pitchVariation: 0.08
+    minInterval: 0.12
+  stride: 1.5
+  minSpeed: 1
+  maxSpeed: 12
 --- !u!1001 &923155130
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56092,6 +56214,273 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1580729503}
   m_CullTransparentMesh: 1
+--- !u!1 &1608853605
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1608853608}
+  - component: {fileID: 1608853607}
+  - component: {fileID: 1608853606}
+  m_Layer: 0
+  m_Name: Audio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1608853606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1608853605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed12500087863e047bdd3d8686a8b3c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Audio.GameSfx
+  level: {fileID: 369325314}
+  spawner: {fileID: 0}
+  knight: {fileID: 0}
+  bard: {fileID: 0}
+  knightSwing:
+    clips:
+    - {fileID: 8300000, guid: 0072cdc574950714fa194f74f56e0178, type: 3}
+    - {fileID: 8300000, guid: 29e60e7c75a2e4a4ab1745094107bd7f, type: 3}
+    volume: 1
+    pitchVariation: 0.06
+    minInterval: 0.08
+  knightSwingHeavy:
+    clips:
+    - {fileID: 8300000, guid: 97819dfe8d78e954391cc5135d16b9aa, type: 3}
+    volume: 1
+    pitchVariation: 0.04
+    minInterval: 0.05
+  spinWhirl:
+    clips:
+    - {fileID: 8300000, guid: 483dd994aeca59f429c4605439b20238, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.5
+  spinExplosion:
+    clips:
+    - {fileID: 8300000, guid: 72fd3feea30de4e4b878c93d319970d3, type: 3}
+    volume: 1
+    pitchVariation: 0.04
+    minInterval: 0.05
+  chargeDash:
+    clips:
+    - {fileID: 8300000, guid: b0bc636aed3c3f34f973cc242d0d31f6, type: 3}
+    volume: 1
+    pitchVariation: 0.03
+    minInterval: 0.05
+  dodge:
+    clips:
+    - {fileID: 8300000, guid: eb2349e0ac9851c498d981411f8f97f2, type: 3}
+    volume: 1
+    pitchVariation: 0.06
+    minInterval: 0.05
+  knightHurt:
+    clips:
+    - {fileID: 8300000, guid: 858442790371bb8489f3d5ef0b23179a, type: 3}
+    - {fileID: 8300000, guid: 37257cc44fabba94bb78d05272a499a8, type: 3}
+    volume: 1
+    pitchVariation: 0.05
+    minInterval: 0.15
+  knightDeath:
+    clips:
+    - {fileID: 8300000, guid: a8442a05974fb2246b919b92b009092a, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  buffOn:
+    clips:
+    - {fileID: 8300000, guid: ea8e5f2ab66919b478de63ac3e4faa7e, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.5
+  buffOff:
+    clips:
+    - {fileID: 8300000, guid: 81677bc2a7754354ba09e0e2d563175a, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.5
+  abilityReady:
+    clips:
+    - {fileID: 8300000, guid: db088f9f63305974b868e34825ae4379, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  hitLight:
+    clips:
+    - {fileID: 8300000, guid: 24fa7dc0e3d3f24418ce91dc616ab0b8, type: 3}
+    - {fileID: 8300000, guid: bc65e472ebbdabf43ab954263c93dbde, type: 3}
+    - {fileID: 8300000, guid: 996d4f25a029ce247a3478f0063a6747, type: 3}
+    volume: 1
+    pitchVariation: 0.08
+    minInterval: 0.05
+  hitHeavy:
+    clips:
+    - {fileID: 8300000, guid: cd36813a6bf77724c9fe7dbd7d8e9c7b, type: 3}
+    - {fileID: 8300000, guid: a61202b11bddf0e44adb54ba1b12d775, type: 3}
+    volume: 1
+    pitchVariation: 0.06
+    minInterval: 0.06
+  hitNote:
+    clips:
+    - {fileID: 8300000, guid: 72915c9172875d44da9b87ff0f2df5ea, type: 3}
+    - {fileID: 8300000, guid: 7be84a98e12a9934d87506af9058c842, type: 3}
+    volume: 1
+    pitchVariation: 0.05
+    minInterval: 0.05
+  bardNote:
+    clips:
+    - {fileID: 8300000, guid: d2edec06ae219f646bb0258163b2e76e, type: 3}
+    - {fileID: 8300000, guid: 31538feaa1932b94baf7920f79b42c64, type: 3}
+    - {fileID: 8300000, guid: 23352f3fbf37ef243b509cd46add3308, type: 3}
+    - {fileID: 8300000, guid: 1d920724e0c719848948a582dd388eae, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  bassDropCharge:
+    clips:
+    - {fileID: 8300000, guid: 81bff1da06b39d4458be22bb933aa577, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  bassDropBoom:
+    clips:
+    - {fileID: 8300000, guid: 4fa194f0094828e4a864f0a9156e5dd8, type: 3}
+    volume: 1
+    pitchVariation: 0.03
+    minInterval: 0.05
+  danceFloorOpen:
+    clips:
+    - {fileID: 8300000, guid: 0a40ebc00db676347a8d4f5d3976845d, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  danceFloorClose:
+    clips:
+    - {fileID: 8300000, guid: d9a1cba384f24df47b9f38ca59a79a41, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  healTick:
+    clips:
+    - {fileID: 8300000, guid: 4f98752b9241ac143ae0b1ca041f8c5a, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.3
+  bardHurt:
+    clips:
+    - {fileID: 8300000, guid: f57f3b06105dea34c93336c910255e24, type: 3}
+    - {fileID: 8300000, guid: 2be77c31e69c37040b8a60571805bc7e, type: 3}
+    volume: 1
+    pitchVariation: 0.05
+    minInterval: 0.15
+  bardDeath:
+    clips:
+    - {fileID: 8300000, guid: d992500c96cbe77419b1149082ff76e7, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  songInterrupt:
+    clips:
+    - {fileID: 8300000, guid: d04c55cedd42f28468a9f68b360b78f3, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.3
+  soldierSpawn:
+    clips:
+    - {fileID: 8300000, guid: b4813cb0dace1964cac0a11b62139ee9, type: 3}
+    volume: 1
+    pitchVariation: 0.08
+    minInterval: 0.1
+  soldierWindup:
+    clips:
+    - {fileID: 8300000, guid: 78f0b4ad0cd805a4d9aae5963f6f67ab, type: 3}
+    - {fileID: 8300000, guid: ec96d5f17dccebe47a1bed548121778c, type: 3}
+    volume: 1
+    pitchVariation: 0.08
+    minInterval: 0.12
+  soldierSwing:
+    clips:
+    - {fileID: 8300000, guid: c9c851a673f1dca42acfff31419aa3f0, type: 3}
+    - {fileID: 8300000, guid: f7ea1145ad0999749a01915d15dffac1, type: 3}
+    volume: 1
+    pitchVariation: 0.08
+    minInterval: 0.08
+  soldierDeath:
+    clips:
+    - {fileID: 8300000, guid: ac40807033901ee4a87a07302703384b, type: 3}
+    - {fileID: 8300000, guid: 6214e20f6de6bb444bd69b989974dae8, type: 3}
+    - {fileID: 8300000, guid: 53633203caec33e4f9b35ac14f5b27fb, type: 3}
+    volume: 1
+    pitchVariation: 0.08
+    minInterval: 0.08
+  waveStart:
+    clips:
+    - {fileID: 8300000, guid: 2bbcedc05ebdafa498437663de6288a8, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  waveCleared:
+    clips:
+    - {fileID: 8300000, guid: c33de6b264e8ed545b8c4d1e63405ecf, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  victory:
+    clips:
+    - {fileID: 8300000, guid: ed7b7f63a5159b04ca2dfa1467b95009, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+  defeat:
+    clips:
+    - {fileID: 8300000, guid: aef2840dc69a42341a1741179542e1b2, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.05
+--- !u!114 &1608853607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1608853605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5094d09f0a755c341a75c58349714b97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Audio.AmbiencePlayer
+  level: {fileID: 369325314}
+  clip: {fileID: 8300000, guid: f1d2673cf1406de4ea2a7bdc46ff9c30, type: 3}
+  volume: 0.9
+  fadeIn: 1
+  fadeOut: 2.5
+  output: {fileID: 6684545442699778206, guid: 6b21c8b789819a24a8ae5944cb17d534, type: 2}
+--- !u!4 &1608853608
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1608853605}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1611419435
 GameObject:
   m_ObjectHideFlags: 0
@@ -57833,6 +58222,7 @@ GameObject:
   - component: {fileID: 1741794352}
   - component: {fileID: 1741794351}
   - component: {fileID: 1741794350}
+  - component: {fileID: 1741794354}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -57942,6 +58332,30 @@ RectTransform:
   m_AnchoredPosition: {x: 180, y: -90}
   m_SizeDelta: {x: 320, y: 76}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1741794354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741794349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d1f61e6b2433f84cb4b20719562ac53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.UI.ButtonSfx
+  hover:
+    clips:
+    - {fileID: 8300000, guid: aefe0a99b107d8b4290af1e7b36a4725, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
+  click:
+    clips:
+    - {fileID: 8300000, guid: ff812f7ef9ace1a4eb3209c1227a6fd7, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
 --- !u!1 &1775682443
 GameObject:
   m_ObjectHideFlags: 0
@@ -58790,6 +59204,7 @@ GameObject:
   - component: {fileID: 1859566903}
   - component: {fileID: 1859566902}
   - component: {fileID: 1859566905}
+  - component: {fileID: 1859566906}
   m_Layer: 7
   m_Name: Bard
   m_TagString: Untagged
@@ -58926,6 +59341,7 @@ MonoBehaviour:
   radius: 8
   recoveryTime: 3
   startDelay: 1
+  waitForCombat: 1
   scanInterval: 0.2
   aura: {fileID: 1611419435}
   logToConsole: 1
@@ -59245,16 +59661,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Heroes.BardSongAudio
   song: {fileID: 1859566884}
   level: {fileID: 0}
-  loopClip: {fileID: 8300000, guid: 30eff070bec667f42950bd7c40b48fcd, type: 3}
+  layerClips:
+  - {fileID: 8300000, guid: 5443c9680092977498b2e957dd9d1844, type: 3}
+  - {fileID: 8300000, guid: 3986cc6625437ca4daf32ffcc86e8d2c, type: 3}
+  - {fileID: 8300000, guid: 91b3f1d02b132914eb3066f6b09ee0f3, type: 3}
   introClip: {fileID: 8300000, guid: 6811f85a7a704e940ab8993d70220fa1, type: 3}
   bpm: 96
   beatsPerBar: 4
   resumeEveryBars: 4
+  startGapBars: 4
+  layersOnReturn: 2
+  returnGapBars: 4
   volume: 0.6
   spatialBlend: 0
-  output: {fileID: 0}
+  output: {fileID: -1898003139678151790, guid: 6b21c8b789819a24a8ae5944cb17d534, type: 2}
   cutTime: 0.35
   fadeTime: 1.2
+--- !u!114 &1859566906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859566877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eda53462f13f5448a5b287e2d4c6b1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.Audio.Footsteps
+  steps:
+    clips:
+    - {fileID: 8300000, guid: 6d0850a365e0508428dec32b26c0a3a2, type: 3}
+    - {fileID: 8300000, guid: 5fac39833c54ed54ca5b6e2503ccc66d, type: 3}
+    - {fileID: 8300000, guid: f5f82a6d2fd21024f84eaa163c252b1b, type: 3}
+    - {fileID: 8300000, guid: 8814503231182fe42ab961a575a0c3c1, type: 3}
+    volume: 0.25
+    pitchVariation: 0.08
+    minInterval: 0.12
+  stride: 1.5
+  minSpeed: 1
+  maxSpeed: 12
 --- !u!1 &1888303481
 GameObject:
   m_ObjectHideFlags: 0
@@ -61913,6 +62359,7 @@ GameObject:
   - component: {fileID: 2042076981}
   - component: {fileID: 2042076980}
   - component: {fileID: 2042076979}
+  - component: {fileID: 2042076983}
   m_Layer: 5
   m_Name: MenuButton
   m_TagString: Untagged
@@ -62022,6 +62469,30 @@ RectTransform:
   m_AnchoredPosition: {x: 180, y: -90}
   m_SizeDelta: {x: 320, y: 76}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2042076983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2042076978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d1f61e6b2433f84cb4b20719562ac53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLastBeat.UI.ButtonSfx
+  hover:
+    clips:
+    - {fileID: 8300000, guid: aefe0a99b107d8b4290af1e7b36a4725, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
+  click:
+    clips:
+    - {fileID: 8300000, guid: ff812f7ef9ace1a4eb3209c1227a6fd7, type: 3}
+    volume: 1
+    pitchVariation: 0
+    minInterval: 0.04
 --- !u!1 &2061483809
 GameObject:
   m_ObjectHideFlags: 0
@@ -71978,3 +72449,5 @@ SceneRoots:
   - {fileID: 782271255}
   - {fileID: 1614609010}
   - {fileID: 756249675}
+  - {fileID: 175842113}
+  - {fileID: 1608853608}

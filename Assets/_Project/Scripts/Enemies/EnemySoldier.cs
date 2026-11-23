@@ -94,6 +94,10 @@ namespace TheLastBeat.Enemies
         private bool hasAnimationBridge;   // Hit y Die los dispara el puente, no este script
         private bool hasStagger;           // el Animator tiene el trigger Stagger
         private bool staggerChecked;
+        private bool swingAnnounced;       // ya avisó del golpe que está por lanzar
+
+        /// <summary>El aviso del golpe sale un poco antes del impacto, para que el silbido de la cimitarra llegue con él.</summary>
+        private const float SwingLead = 0.12f;
 
         /// <summary>Murió (para contar las bajas de la horda).</summary>
         public event Action<EnemySoldier> Died;
@@ -153,6 +157,7 @@ namespace TheLastBeat.Enemies
             repathTimer = 0f;
             cooldownTimer = UnityEngine.Random.Range(0f, 0.5f); // que no ataquen todos al mismo tiempo
             SetState(State.Chase);
+            CombatEvents.RaiseEnemy(EnemyCue.Spawned, position);
         }
 
         /// <summary>Lo deja aturdido (lo usará el demonio tanque en la tarea 53).</summary>
@@ -236,11 +241,18 @@ namespace TheLastBeat.Enemies
             SetState(State.Windup);
             if (attackIndicator != null) attackIndicator.SetActive(true);
             if (animator != null) animator.SetTrigger(AttackHash);
+            swingAnnounced = false;
+            CombatEvents.RaiseEnemy(EnemyCue.Windup, transform.position);
         }
 
         private void UpdateWindup(float dt)
         {
             if (target != null) FaceTowards(target.transform.position, dt);
+            if (!swingAnnounced && stateTimer >= windupTime - SwingLead)
+            {
+                swingAnnounced = true;
+                CombatEvents.RaiseEnemy(EnemyCue.Swing, transform.position);
+            }
             if (stateTimer >= windupTime)
             {
                 Strike();
@@ -284,6 +296,7 @@ namespace TheLastBeat.Enemies
                 if (CanStagger()) animator.ResetTrigger(StaggerHash);
                 if (!hasAnimationBridge) animator.SetTrigger(DieHash);
             }
+            CombatEvents.RaiseEnemy(EnemyCue.Died, transform.position);
             Died?.Invoke(this);
         }
 

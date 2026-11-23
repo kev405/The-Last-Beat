@@ -3,6 +3,15 @@ using UnityEngine;
 
 namespace TheLastBeat.Combat
 {
+    /// <summary>Lo que hace un enemigo y se oye (tarea 32).</summary>
+    public enum EnemyCue
+    {
+        Spawned,
+        Windup,
+        Swing,
+        Died
+    }
+
     /// <summary>
     /// Avisos globales de combate. Cada vez que un golpe se aplica, HitDetector lo anuncia aquí.
     /// Lo escucharán la pausa de impacto, la sacudida de cámara y los números de daño (tarea 12),
@@ -20,6 +29,14 @@ namespace TheLastBeat.Combat
 
         public static void RaiseHeal(Health target, float amount) => Healed?.Invoke(target, amount);
 
+        /// <summary>
+        /// Un enemigo apareció, empezó a preparar un golpe, lo lanzó o murió: qué hizo y dónde. Lo escucha el audio
+        /// (GameSfx, tarea 32), sin que el enemigo sepa nada de sonido.
+        /// </summary>
+        public static event Action<EnemyCue, Vector3> EnemyActed;
+
+        public static void RaiseEnemy(EnemyCue cue, Vector3 position) => EnemyActed?.Invoke(cue, position);
+
         // Si se desactiva "Domain Reload" en Play Mode, los eventos estáticos sobreviven entre
         // partidas y se acumulan suscriptores. Esto los limpia al iniciar cada Play.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -27,6 +44,7 @@ namespace TheLastBeat.Combat
         {
             Hit = null;
             Healed = null;
+            EnemyActed = null;
         }
     }
 }

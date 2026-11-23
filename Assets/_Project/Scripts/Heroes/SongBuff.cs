@@ -1,5 +1,6 @@
 using System;
 using TheLastBeat.Combat;
+using TheLastBeat.Level;
 using UnityEngine;
 
 namespace TheLastBeat.Heroes
@@ -19,6 +20,7 @@ namespace TheLastBeat.Heroes
     /// de su radio (BuffReceiver). Si la golpean con un golpe que interrumpe, la canción se
     /// corta, el grupo pierde la potenciación y tarda recoveryTime en volver; otro golpe
     /// durante la recuperación reinicia el contador.
+    /// Con waitForCombat no empieza a cantar hasta que LevelFlow pasa a Combat: el pueblo llega en silencio.
     /// El audio (tarea 32), los efectos (33) y la interfaz (34) escuchan SongStateChanged.
     /// </summary>
     [RequireComponent(typeof(Health))]
@@ -29,8 +31,10 @@ namespace TheLastBeat.Heroes
         [SerializeField, Min(0.5f)] private float radius = 8f;
         [Tooltip("Segundos que tarda en volver a cantar después de un golpe.")]
         [SerializeField, Min(0f)] private float recoveryTime = 3f;
-        [Tooltip("Segundos desde el inicio del nivel hasta que empieza a cantar.")]
+        [Tooltip("Segundos desde que puede cantar (el inicio del combate o, sin waitForCombat, del nivel) hasta que empieza.")]
         [SerializeField, Min(0f)] private float startDelay = 1f;
+        [Tooltip("Espera a que empiece el combate (LevelFlow en Combat) para cantar. Apagado, canta desde que carga el nivel.")]
+        [SerializeField] private bool waitForCombat = true;
         [Tooltip("Cada cuánto revisa quién está dentro del radio.")]
         [SerializeField, Min(0.05f)] private float scanInterval = 0.2f;
 
@@ -42,6 +46,7 @@ namespace TheLastBeat.Heroes
         [SerializeField] private bool logToConsole = true;
 
         private Health health;
+        private LevelFlow level;
         private SongState state = SongState.Silent;
         private float recoveryRemaining;
         private float startTimer;
@@ -59,6 +64,7 @@ namespace TheLastBeat.Heroes
         private void Awake()
         {
             health = GetComponent<Health>();
+            level = FindFirstObjectByType<LevelFlow>();
             if (aura != null) aura.SetActive(false);
         }
 
@@ -84,6 +90,8 @@ namespace TheLastBeat.Heroes
             switch (state)
             {
                 case SongState.Silent:
+                    // En la llegada al pueblo no canta: empieza con el combate.
+                    if (waitForCombat && level != null && level.State == GameState.Exploring) break;
                     startTimer -= dt;
                     if (startTimer <= 0f) SetState(SongState.Singing);
                     break;

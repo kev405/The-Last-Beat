@@ -6,15 +6,19 @@ using UnityEngine.Audio;
 namespace TheLastBeat.Heroes
 {
     /// <summary>
-    /// El sonido de la canción de la bardo (tarea 32). Escucha SongBuff.SongStateChanged, igual que SongAnimation:
-    ///  - Singing: suena el loop del dembow.
-    ///  - Interrupted: la canción se frena como una cinta (el tono baja hasta cero) y queda el silencio. Cuando a la
-    ///    recuperación le falta lo que dura la entrada, suena la entrada y el loop arranca pegado a ella, en la
-    ///    frase siguiente a la que se cortó. Otro golpe durante la recuperación corta también la entrada.
+    /// El sonido de la canción de la bardo, por capas (tarea 32). Escucha SongBuff.SongStateChanged, igual que
+    /// SongAnimation. La canción son varios clips que duran lo mismo (base, percusión y melodía) y suenan
+    /// sincronizados, cada uno en su fuente:
+    ///  - Singing por primera vez: las capas entran una por una, cada startGapBars compases.
+    ///  - Interrupted: todo se frena como una cinta (el tono baja hasta cero) y queda el silencio. Cuando a la
+    ///    recuperación le falta lo que dura la entrada, suena la entrada y, pegadas a ella, vuelven las primeras
+    ///    layersOnReturn capas en la frase siguiente a la que se cortó; las demás entran returnGapBars compases
+    ///    después. Si la golpean seguido, la melodía no alcanza a volver. Otro golpe durante la recuperación
+    ///    corta también la entrada.
     ///  - Silent (la bardo cayó): se apaga más despacio.
     /// También se apaga si el nivel termina en derrota (LevelFlow.StateChanged); en la victoria sigue sonando.
     /// Avisa de cada pulso con Beat, para que los efectos se muevan al ritmo (ver BeatPulse).
-    /// Va en el mismo objeto que SongBuff. Las dos fuentes de audio las crea sola al empezar.
+    /// Va en el mismo objeto que SongBuff. Las fuentes de audio las crea sola al empezar.
     /// Usa tiempo real (no Time.deltaTime): la pausa de impacto y la pantalla de derrota no la afectan.
     /// </summary>
     public class BardSongAudio : MonoBehaviour
@@ -26,8 +30,8 @@ namespace TheLastBeat.Heroes
         [SerializeField] private LevelFlow level;
 
         [Header("Clips")]
-        [Tooltip("El dembow. Debe durar un número entero de compases.")]
-        [SerializeField] private AudioClip loopClip;
+        [Tooltip("Las capas del dembow en el orden en que entran: base, percusión y melodía. Deben durar lo mismo y un número entero de compases.")]
+        [SerializeField] private AudioClip[] layerClips = new AudioClip[0];
         [Tooltip("Entrada que suena justo antes de que la canción vuelva. Opcional.")]
         [SerializeField] private AudioClip introClip;
 
@@ -37,11 +41,19 @@ namespace TheLastBeat.Heroes
         [Tooltip("Después de un corte, la canción vuelve en el siguiente bloque de este tamaño (en compases). 4 = una frase.")]
         [SerializeField, Min(1)] private int resumeEveryBars = 4;
 
+        [Header("Capas")]
+        [Tooltip("Al empezar la canción, cada capa entra estos compases después de la anterior. 4 = una frase (10 s). 0 = todas juntas.")]
+        [SerializeField, Min(0)] private int startGapBars = 4;
+        [Tooltip("Al volver de un corte, cuántas capas entran de una vez con la entrada.")]
+        [SerializeField, Min(1)] private int layersOnReturn = 2;
+        [Tooltip("Al volver de un corte, cada capa que falta entra estos compases después. 4 = una frase.")]
+        [SerializeField, Min(0)] private int returnGapBars = 4;
+
         [Header("Mezcla")]
         [SerializeField, Range(0f, 1f)] private float volume = 0.6f;
         [Tooltip("0 = se oye igual en todo el nivel (música). 1 = sale de la posición de la bardo.")]
         [SerializeField, Range(0f, 1f)] private float spatialBlend = 0f;
-        [Tooltip("Opcional: grupo del Audio Mixer por el que sale.")]
+        [Tooltip("Opcional: grupo Música del Audio Mixer.")]
         [SerializeField] private AudioMixerGroup output;
 
         [Header("Corte")]
@@ -53,17 +65,20 @@ namespace TheLastBeat.Heroes
         /// <summary>Margen para programar un clip con precisión de muestra (AudioSource.PlayScheduled).</summary>
         private const double ScheduleMargin = 0.05;
 
-        private AudioSource loopSource;
+        private AudioSource[] layerSources = new AudioSource[0];
         private AudioSource introSource;
+        private AudioSource baseSource;   // la primera capa: lleva el compás
 
         private double samplesPerBeat;
         private int samplesPerBar = 1;
         private int totalBars = 1;
+        private double barSeconds;
         private double introLength;
 
-        private int nextBar;            // compás del loop en el que arranca la próxima vez
-        private double loopStartDsp;    // momento (AudioSettings.dspTime) en el que el loop empieza a oírse
-        private bool resumeScheduled;   // la entrada y el loop ya quedaron programados para el regreso
+        private int nextBar;            // compás en el que arranca la próxima vez
+        private double loopStartDsp;    // momento (AudioSettings.dspTime) en el que la primera capa empieza a oírse
+        private bool everStarted;       // la canción ya sonó alguna vez: lo siguiente es un regreso, no un inicio
+        private bool resumeScheduled;   // la entrada y las capas ya quedaron programadas para el regreso
         private float lastRemaining;
         private bool stopping;
         private float stopTimer;
@@ -76,47 +91,64 @@ namespace TheLastBeat.Heroes
 
         public float Bpm => bpm;
 
-        /// <summary>True mientras el loop se oye (no durante la entrada ni mientras se frena).</summary>
+        /// <summary>True mientras la canción se oye (no durante la entrada ni mientras se frena).</summary>
         public bool IsPlaying =>
-            loopSource != null && !stopping && loopSource.isPlaying && AudioSettings.dspTime >= loopStartDsp;
+            baseSource != null && !stopping && baseSource.isPlaying && AudioSettings.dspTime >= loopStartDsp;
 
         /// <summary>Avance dentro del pulso actual, de 0 a 1. Sirve para animar algo de forma continua con el ritmo.</summary>
         public float BeatProgress =>
-            IsPlaying && samplesPerBeat > 0.0 ? (float)(loopSource.timeSamples % samplesPerBeat / samplesPerBeat) : 0f;
+            IsPlaying && samplesPerBeat > 0.0 ? (float)(baseSource.timeSamples % samplesPerBeat / samplesPerBeat) : 0f;
 
         private void Awake()
         {
             if (song == null) song = GetComponent<SongBuff>();
             if (level == null) level = FindFirstObjectByType<LevelFlow>();
 
-            loopSource = CreateSource("SongAudio_Loop", loopClip, true);
+            layerSources = new AudioSource[layerClips != null ? layerClips.Length : 0];
+            for (int i = 0; i < layerSources.Length; i++)
+            {
+                layerSources[i] = CreateSource("SongAudio_Layer" + i, layerClips[i], true);
+                if (baseSource == null && layerClips[i] != null) baseSource = layerSources[i];
+            }
             introSource = CreateSource("SongAudio_Intro", introClip, false);
 
-            if (loopClip == null)
+            if (baseSource == null)
             {
-                Debug.LogWarning("[BardSongAudio] Falta el clip del loop: ejecuta \"The Last Beat/Audio/Montar canción de la bardo\".", this);
+                Debug.LogWarning("[BardSongAudio] Faltan las capas de la canción: ejecuta \"The Last Beat/Audio/Montar audio de la escena\".", this);
                 return;
             }
 
-            samplesPerBeat = loopClip.frequency * 60.0 / bpm;
+            AudioClip first = baseSource.clip;
+            samplesPerBeat = first.frequency * 60.0 / bpm;
             samplesPerBar = Mathf.Max(1, (int)Math.Round(samplesPerBeat * beatsPerBar));
-            totalBars = Mathf.Max(1, (int)Math.Round(loopClip.samples / (double)samplesPerBar));
-            if (Math.Abs(loopClip.samples - (long)totalBars * samplesPerBar) > loopClip.frequency / 100)
-                Debug.LogWarning($"[BardSongAudio] {loopClip.name} no dura un número entero de compases a {bpm} BPM: el ritmo se va a descuadrar.", this);
-
-            if (introClip != null) introLength = introClip.samples / (double)introClip.frequency;
+            totalBars = Mathf.Max(1, (int)Math.Round(first.samples / (double)samplesPerBar));
+            barSeconds = samplesPerBar / (double)first.frequency;
+            if (Math.Abs(first.samples - (long)totalBars * samplesPerBar) > first.frequency / 100)
+                Debug.LogWarning($"[BardSongAudio] {first.name} no dura un número entero de compases a {bpm} BPM: el ritmo se va a descuadrar.", this);
 
             // Los deja cargados desde ya, aunque el clip no tenga marcado Preload Audio Data: así el primer
-            // PlayScheduled no espera a que se cargue y la entrada no da un tirón en mitad del combate.
-            loopClip.LoadAudioData();
-            if (introClip != null) introClip.LoadAudioData();
+            // PlayScheduled no espera a que se cargue y nada da un tirón en mitad del combate.
+            for (int i = 0; i < layerClips.Length; i++)
+            {
+                AudioClip clip = layerClips[i];
+                if (clip == null) continue;
+                clip.LoadAudioData();
+                if (clip.samples != first.samples || clip.frequency != first.frequency)
+                    Debug.LogWarning($"[BardSongAudio] {clip.name} no dura lo mismo que {first.name}: las capas se van a desfasar.", this);
+            }
+
+            if (introClip != null)
+            {
+                introLength = introClip.samples / (double)introClip.frequency;
+                introClip.LoadAudioData();
+            }
         }
 
         private void OnEnable()
         {
             if (song != null) song.SongStateChanged += OnSongStateChanged;
             if (level != null) level.StateChanged += OnLevelStateChanged;
-            if (song != null && song.State == SongState.Singing && !silenced) StartLoop();
+            if (song != null && song.State == SongState.Singing && !silenced) StartLayers();
         }
 
         private void OnDisable()
@@ -130,14 +162,16 @@ namespace TheLastBeat.Heroes
         private void OnValidate()
         {
             // Para ajustar la mezcla desde el Inspector con el juego corriendo.
-            if (loopSource == null || introSource == null) return;
-            loopSource.spatialBlend = spatialBlend;
-            introSource.spatialBlend = spatialBlend;
-            loopSource.outputAudioMixerGroup = output;
-            introSource.outputAudioMixerGroup = output;
-            if (stopping) return;
-            loopSource.volume = volume;
-            introSource.volume = volume;
+            if (introSource == null) return;
+            Apply(introSource);
+            for (int i = 0; i < layerSources.Length; i++) Apply(layerSources[i]);
+        }
+
+        private void Apply(AudioSource source)
+        {
+            source.spatialBlend = spatialBlend;
+            source.outputAudioMixerGroup = output;
+            if (!stopping) source.volume = volume;
         }
 
         private void Update()
@@ -158,9 +192,9 @@ namespace TheLastBeat.Heroes
             switch (state)
             {
                 case SongState.Singing:
-                    // Si la entrada ya sonó, el loop quedó programado pegado a ella: no hay que hacer nada más.
+                    // Si la entrada ya sonó, las capas quedaron programadas pegadas a ella: no hay que hacer nada más.
                     if (resumeScheduled) resumeScheduled = false;
-                    else StartLoop();
+                    else StartLayers();
                     break;
 
                 case SongState.Interrupted:
@@ -188,21 +222,39 @@ namespace TheLastBeat.Heroes
 
         // ---------- Sonar ----------
 
-        /// <summary>Arranca el loop ya (sin entrada), en el compás que toca.</summary>
-        private void StartLoop()
+        /// <summary>Arranca las capas ya (sin entrada), en el compás que toca.</summary>
+        private void StartLayers()
         {
-            if (loopClip == null) return;
+            if (baseSource == null) return;
 
             FinishStop();
-            loopStartDsp = AudioSettings.dspTime + ScheduleMargin;
-            loopSource.timeSamples = nextBar * samplesPerBar;
-            loopSource.PlayScheduled(loopStartDsp);
+            ScheduleLayers(AudioSettings.dspTime + ScheduleMargin);
+        }
+
+        /// <summary>
+        /// Programa cada capa en su momento a partir de startDsp. La primera vez entran una por una, cada startGapBars
+        /// compases. En un regreso entran juntas las primeras layersOnReturn, y las demás cada returnGapBars compases.
+        /// Una capa que entra tarde arranca en el compás por el que ya van las otras: todas siguen la misma partitura.
+        /// </summary>
+        private void ScheduleLayers(double startDsp)
+        {
+            loopStartDsp = startDsp;
+            for (int i = 0; i < layerSources.Length; i++)
+            {
+                AudioSource source = layerSources[i];
+                if (source.clip == null) continue;
+
+                int delayBars = everStarted ? Math.Max(0, i - layersOnReturn + 1) * returnGapBars : i * startGapBars;
+                source.timeSamples = (nextBar + delayBars) % totalBars * samplesPerBar;
+                source.PlayScheduled(startDsp + delayBars * barSeconds);
+            }
+            everStarted = true;
             lastBeat = -1;
         }
 
         /// <summary>
         /// Mientras la canción está cortada: espera a que a la recuperación le falte lo que dura la entrada y entonces
-        /// programa la entrada y, pegado a ella, el loop. SongBuff no avisa si otro golpe reinicia la recuperación
+        /// programa la entrada y, pegadas a ella, las capas. SongBuff no avisa si otro golpe reinicia la recuperación
         /// (el estado no cambia), así que eso se detecta aquí: el tiempo que falta sube en vez de bajar.
         /// </summary>
         private void TickRecovery()
@@ -217,7 +269,7 @@ namespace TheLastBeat.Heroes
                     BeginStop(cutTime);
                 }
             }
-            else if (!stopping && introClip != null && loopClip != null && remaining <= introLength + ScheduleMargin)
+            else if (!stopping && introClip != null && baseSource != null && remaining <= introLength + ScheduleMargin)
             {
                 ScheduleResume(remaining);
             }
@@ -235,20 +287,15 @@ namespace TheLastBeat.Heroes
             if (skip < 0.03) skip = 0.0;
             int skipSamples = (int)(skip * introClip.frequency);
 
+            double layersAt = startAt;
             if (skipSamples < introClip.samples)
             {
                 introSource.timeSamples = skipSamples;
                 introSource.PlayScheduled(startAt);
-                loopStartDsp = startAt + (introClip.samples - skipSamples) / (double)introClip.frequency;
-            }
-            else
-            {
-                loopStartDsp = startAt;
+                layersAt = startAt + (introClip.samples - skipSamples) / (double)introClip.frequency;
             }
 
-            loopSource.timeSamples = nextBar * samplesPerBar;
-            loopSource.PlayScheduled(loopStartDsp);
-            lastBeat = -1;
+            ScheduleLayers(layersAt);
             resumeScheduled = true;
         }
 
@@ -257,7 +304,7 @@ namespace TheLastBeat.Heroes
         {
             if (!IsPlaying) return;
 
-            int bar = loopSource.timeSamples / samplesPerBar;
+            int bar = baseSource.timeSamples / samplesPerBar;
             int next = (bar / resumeEveryBars + 1) * resumeEveryBars;
             nextBar = next < totalBars ? next : 0;
         }
@@ -266,7 +313,7 @@ namespace TheLastBeat.Heroes
         {
             if (!IsPlaying) return;
 
-            int beat = (int)(loopSource.timeSamples / samplesPerBeat);
+            int beat = (int)(baseSource.timeSamples / samplesPerBeat);
             if (beat == lastBeat) return;
             lastBeat = beat;
             Beat?.Invoke(beat % beatsPerBar);
@@ -274,12 +321,20 @@ namespace TheLastBeat.Heroes
 
         // ---------- Callar ----------
 
+        private bool AnythingPlaying()
+        {
+            if (introSource != null && introSource.isPlaying) return true;
+            for (int i = 0; i < layerSources.Length; i++)
+                if (layerSources[i].isPlaying) return true;
+            return false;
+        }
+
         /// <summary>Frena lo que esté sonando como una cinta: el tono baja hasta cero en los segundos indicados.</summary>
         private void BeginStop(float seconds)
         {
-            if (loopSource == null || introSource == null) return;
+            if (introSource == null) return;
 
-            if (!loopSource.isPlaying && !introSource.isPlaying)
+            if (!AnythingPlaying())
             {
                 FinishStop();
                 return;
@@ -301,24 +356,29 @@ namespace TheLastBeat.Heroes
 
             float pitch = Mathf.Max(0.02f, 1f - k);
             float gain = volume * (1f - k * k);
-            loopSource.pitch = pitch;
-            introSource.pitch = pitch;
-            loopSource.volume = gain;
-            introSource.volume = gain;
+            SetAll(pitch, gain);
         }
 
-        /// <summary>Deja las dos fuentes calladas y listas para volver a sonar.</summary>
+        /// <summary>Deja todas las fuentes calladas y listas para volver a sonar.</summary>
         private void FinishStop()
         {
             stopping = false;
-            if (loopSource == null || introSource == null) return;
+            if (introSource == null) return;
 
-            loopSource.Stop();
             introSource.Stop();
-            loopSource.pitch = 1f;
-            introSource.pitch = 1f;
-            loopSource.volume = volume;
-            introSource.volume = volume;
+            for (int i = 0; i < layerSources.Length; i++) layerSources[i].Stop();
+            SetAll(1f, volume);
+        }
+
+        private void SetAll(float pitch, float gain)
+        {
+            introSource.pitch = pitch;
+            introSource.volume = gain;
+            for (int i = 0; i < layerSources.Length; i++)
+            {
+                layerSources[i].pitch = pitch;
+                layerSources[i].volume = gain;
+            }
         }
 
         private AudioSource CreateSource(string sourceName, AudioClip clip, bool loop)
