@@ -13,7 +13,9 @@ namespace TheLastBeat.Characters
     /// No reproduce la reacción mientras el Animator está en un estado con la etiqueta "Action"
     /// (ataques y habilidades), para que una horda no corte cada golpe del jugador.
     ///
-    /// Compatible con pooling: cuando Health.ResetHealth() revive al personaje, reinicia el Animator.
+    /// Compatible con pooling: cuando Health.ResetHealth() revive al personaje, reinicia el Animator. Los parámetros
+    /// del Animator se leen en Awake y, si ahí todavía no estaba listo (un enemigo recién creado por el pool),
+    /// se vuelven a leer la primera vez que hacen falta.
     /// </summary>
     [RequireComponent(typeof(Health))]
     public class CharacterAnimationBridge : MonoBehaviour
@@ -35,6 +37,7 @@ namespace TheLastBeat.Characters
         private bool hasHit;
         private bool hasHitType;
         private bool hasDie;
+        private bool parametersRead;
         private bool wasDead;
         private float lastHitTime = -999f;
 
@@ -46,9 +49,7 @@ namespace TheLastBeat.Characters
             hitHash = Animator.StringToHash(hitTrigger);
             hitTypeHash = Animator.StringToHash(hitTypeParameter);
             dieHash = Animator.StringToHash(dieTrigger);
-            hasHit = HasParameter(hitHash, AnimatorControllerParameterType.Trigger);
-            hasHitType = HasParameter(hitTypeHash, AnimatorControllerParameterType.Int);
-            hasDie = HasParameter(dieHash, AnimatorControllerParameterType.Trigger);
+            ReadParameters();
         }
 
         private void OnEnable()
@@ -67,6 +68,7 @@ namespace TheLastBeat.Characters
 
         private void OnDamaged(Health h, DamageInfo info)
         {
+            ReadParameters();
             if (!hasHit || animator == null || !animator.isActiveAndEnabled) return;
             // El golpe mortal no reproduce "Hit": pasa directo a "Die".
             if (h.CurrentHealth <= 0f) return;
@@ -82,6 +84,7 @@ namespace TheLastBeat.Characters
         {
             wasDead = true;
             if (animator == null) return;
+            ReadParameters();
             if (hasHit) animator.ResetTrigger(hitHash);
             if (hasDie) animator.SetTrigger(dieHash);
         }
@@ -119,11 +122,25 @@ namespace TheLastBeat.Characters
             return 0;
         }
 
-        private bool HasParameter(int hash, AnimatorControllerParameterType type)
+        /// <summary>
+        /// Mira qué parámetros tiene el Animator. Si todavía no devuelve ninguno (el Animator de un objeto recién
+        /// creado o inactivo aún no está listo), no da la lectura por hecha y se repite en el siguiente aviso.
+        /// </summary>
+        private void ReadParameters()
         {
-            if (animator == null || animator.runtimeAnimatorController == null) return false;
+            if (parametersRead || animator == null || animator.runtimeAnimatorController == null) return;
 
             AnimatorControllerParameter[] parameters = animator.parameters;
+            if (parameters.Length == 0) return;
+
+            parametersRead = true;
+            hasHit = HasParameter(parameters, hitHash, AnimatorControllerParameterType.Trigger);
+            hasHitType = HasParameter(parameters, hitTypeHash, AnimatorControllerParameterType.Int);
+            hasDie = HasParameter(parameters, dieHash, AnimatorControllerParameterType.Trigger);
+        }
+
+        private static bool HasParameter(AnimatorControllerParameter[] parameters, int hash, AnimatorControllerParameterType type)
+        {
             for (int i = 0; i < parameters.Length; i++)
             {
                 if (parameters[i].nameHash == hash && parameters[i].type == type) return true;

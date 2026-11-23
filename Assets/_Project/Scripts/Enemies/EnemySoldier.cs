@@ -1,4 +1,5 @@
 using System;
+using TheLastBeat.Characters;
 using TheLastBeat.Combat;
 using TheLastBeat.Core;
 using TheLastBeat.Feedback;
@@ -19,6 +20,11 @@ namespace TheLastBeat.Enemies
     /// prioridad (la bardo, tarea 16) esté cerca. Antes de golpear muestra un aviso en el
     /// suelo (attackIndicator) para que el jugador pueda reaccionar.
     /// Compatible con pooling: EnemyPool llama a ResetForSpawn y escucha Released.
+    ///
+    /// Animación (tarea 28): escribe Speed y dispara Attack al empezar a preparar el golpe y Stagger cuando un
+    /// golpe pesado o un aturdimiento le corta lo que estaba haciendo. Hit y Die los dispara él mismo solo si el
+    /// objeto no tiene un CharacterAnimationBridge; si lo tiene, se encarga el puente (que además elige la
+    /// reacción según de dónde vino el golpe). Al morir espera Sink Delay, lo que tarda en caer, y después se hunde.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent), typeof(Health))]
     public class EnemySoldier : MonoBehaviour
@@ -28,7 +34,7 @@ namespace TheLastBeat.Enemies
         [Header("Referencias")]
         [Tooltip("Disco rojo en el suelo que se muestra mientras prepara el golpe.")]
         [SerializeField] private GameObject attackIndicator;
-        [Tooltip("Opcional hasta la tarea 28. Parámetros Speed, Attack, Hit y Die.")]
+        [Tooltip("Animator del modelo. Parámetros Speed, Attack y Stagger (y Hit y Die si no hay CharacterAnimationBridge).")]
         [SerializeField] private Animator animator;
 
         [Header("Ataque")]
@@ -57,6 +63,9 @@ namespace TheLastBeat.Enemies
         [SerializeField, Min(0.05f)] private float repathInterval = 0.2f;
 
         [Header("Muerte")]
+        [Tooltip("Segundos que el cuerpo se queda donde cayó antes de empezar a hundirse: lo que dura la caída de la animación de muerte.")]
+        [SerializeField, Min(0f)] private float sinkDelay = 0f;
+        [Tooltip("Segundos que tarda en hundirse. Al terminar vuelve al pool.")]
         [SerializeField, Min(0f)] private float deathDuration = 1.0f;
         [SerializeField, Min(0f)] private float sinkDistance = 1.2f;
 
@@ -64,6 +73,7 @@ namespace TheLastBeat.Enemies
         private static readonly int AttackHash = Animator.StringToHash("Attack");
         private static readonly int HitHash = Animator.StringToHash("Hit");
         private static readonly int DieHash = Animator.StringToHash("Die");
+        private static readonly int StaggerHash = Animator.StringToHash("Stagger");
 
         private NavMeshAgent agent;
         private Health health;
@@ -81,6 +91,9 @@ namespace TheLastBeat.Enemies
         private Vector3 push;
         private Vector3 deathStart;
         private bool released;
+        private bool hasAnimationBridge;   // Hit y Die los dispara el puente, no este script
+        private bool hasStagger;           // el Animator tiene el trigger Stagger
+        private bool staggerChecked;
 
         /// <summary>Murió (para contar las bajas de la horda).</summary>
         public event Action<EnemySoldier> Died;
@@ -105,6 +118,8 @@ namespace TheLastBeat.Enemies
             colliders = GetComponentsInChildren<Collider>(true);
             hits = new HitDetector(8);
             if (attackIndicator != null) attackIndicator.SetActive(false);
+
+            hasAnimationBridge = GetComponent<CharacterAnimationBridge>() != null;
         }
 
         private void OnEnable()
@@ -246,7 +261,7 @@ namespace TheLastBeat.Enemies
         {
             if (state == State.Dead) return;
             if (info.Knockback > 0f) push += info.Direction * info.Knockback;
-            if (animator != null) animator.SetTrigger(HitHash);
+            if (animator != null && !hasAnimationBridge) animator.SetTrigger(HitHash);
 
             // Un golpe pesado cancela el ataque que estaba preparando.
             if (info.IsHeavy && state != State.Stunned) EnterTimedState(State.Stagger, staggerTime);
@@ -262,17 +277,25 @@ namespace TheLastBeat.Enemies
             }
             foreach (Collider c in colliders) c.enabled = false;
             deathStart = transform.position;
-            if (animator != null) animator.SetTrigger(DieHash);
+            if (animator != null)
+            {
+                // Que ningún trigger pendiente lo levante después de caer: el golpe mortal pudo ser pesado.
+                animator.ResetTrigger(AttackHash);
+                if (CanStagger()) animator.ResetTrigger(StaggerHash);
+                if (!hasAnimationBridge) animator.SetTrigger(DieHash);
+            }
             Died?.Invoke(this);
         }
 
         private void UpdateDeath(float dt)
         {
-            float k = deathDuration > 0f ? Mathf.Clamp01(stateTimer / deathDuration) : 1f;
+            // Primero se queda donde cayó (sinkDelay) y después se hunde durante deathDuration.
+            float sinking = stateTimer - sinkDelay;
+            float k = sinking <= 0f ? 0f : (deathDuration > 0f ? Mathf.Clamp01(sinking / deathDuration) : 1f);
             stateTimer += dt;
             transform.position = deathStart + Vector3.down * (sinkDistance * k);
 
-            if (stateTimer >= deathDuration && !released)
+            if (stateTimer >= sinkDelay + deathDuration && !released)
             {
                 released = true;
                 Released?.Invoke(this);
@@ -288,6 +311,13 @@ namespace TheLastBeat.Enemies
             }
             SetState(s);
             stateDuration = duration;
+
+            // Corta la animación del ataque y muestra el tambaleo. Con el golpe mortal no: pasa directo a la muerte.
+            if (animator != null && animator.isActiveAndEnabled && health.CurrentHealth > 0f)
+            {
+                animator.ResetTrigger(AttackHash);
+                if (CanStagger()) animator.SetTrigger(StaggerHash);
+            }
         }
 
         private void SetState(State s)
@@ -310,6 +340,30 @@ namespace TheLastBeat.Enemies
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.0001f) return;
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), turnSpeed * dt);
+        }
+
+        /// <summary>
+        /// ¿El Animator tiene el trigger Stagger? Se consulta la primera vez que hace falta y no en Awake, porque
+        /// un soldado recién sacado del pool puede no tener todavía listo su Animator.
+        /// </summary>
+        private bool CanStagger()
+        {
+            if (staggerChecked) return hasStagger;
+            if (animator == null || animator.runtimeAnimatorController == null) return false;
+
+            AnimatorControllerParameter[] parameters = animator.parameters;
+            if (parameters.Length == 0) return false; // aún no está listo: se vuelve a consultar la próxima vez
+
+            staggerChecked = true;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].nameHash == StaggerHash && parameters[i].type == AnimatorControllerParameterType.Trigger)
+                {
+                    hasStagger = true;
+                    break;
+                }
+            }
+            return hasStagger;
         }
 
         private float FlatDistanceTo(Vector3 point)
