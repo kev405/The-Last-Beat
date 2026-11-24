@@ -1,0 +1,3 @@
+# Las capturas del README van en Git normal, no en LFS: así GitHub las muestra siempre
+# y viajan con los commits a cualquier copia del repositorio.
+*.jpg -filter -diff -merge -text
